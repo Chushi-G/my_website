@@ -13,17 +13,16 @@
       <pubDate>Tue, 31 Oct 2017 22:42:51 -0500</pubDate>
       
       <guid>/blogs/blog4/</guid>
-      <description>Having completed my BBA degree at ESADE Business School in Spain with an exchange semester at Cornell University in the US, I decided to undertake a more specialized Master&amp;rsquo;s degree in finance to deepen my understanding of different financial topics and fully prepare myself for an investment banking career. Therefore, I am currently reading for my Masters in Financial Analysis degree at London Business School in the UK.
-Prior to LBS, I have completed IB internships in Germany and the UK.</description>
+      <description>My name is Chushi Guo. Having completed my BBA degree at ESADE Business School in Spain with an exchange semester at Cornell University in the US, I decided to undertake a more specialized Master&amp;rsquo;s degree in finance to deepen my understanding of different financial topics and fully prepare myself for an investment banking career. Therefore, I am currently reading for my Masters in Financial Analysis degree at London Business School in the UK.</description>
     </item>
     
     <item>
-      <title>Tempus</title>
+      <title>Tracking Donald Trump approval rates in US election 2020</title>
       <link>/blogs/blog3/</link>
       <pubDate>Tue, 31 Oct 2017 22:26:13 -0500</pubDate>
       
       <guid>/blogs/blog3/</guid>
-      <description></description>
+      <description>knitr::opts_chunk$set( message = FALSE, warning = FALSE, tidy=FALSE, # display code as typed size=&amp;quot;small&amp;quot;) # slightly smaller font for code options(digits = 3) # default figure size knitr::opts_chunk$set( fig.width=6.75, fig.height=6.75, fig.align = &amp;quot;center&amp;quot; ) library(tidyverse) # Load ggplot2, dplyr, and all the other tidyverse packages library(mosaic) library(ggthemes) library(lubridate) library(here) library(skimr) library(janitor) library(httr) library(readxl) library(vroom) As we saw in class, fivethirtyeight.com has detailed data on all polls that track the president&amp;rsquo;s approval</description>
     </item>
     
     <item>
