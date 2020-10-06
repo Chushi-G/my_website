@@ -101,7 +101,7 @@ disqusShortname = ""
       title = "My first R project"
       subtitle = "Tracking Donald Trump approval rates in US election 2020"
       image = "trump.png"
-      url = "blogs/blog5"
+      url = "blogs/blog3"
 
     [[params.tiles.showcase]]
       title = "My investment portfolios"
