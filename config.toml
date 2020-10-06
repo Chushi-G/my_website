@@ -95,13 +95,13 @@ disqusShortname = ""
       title = "About me"
       subtitle = "Who I am and What I do"
       image = "pic01.jpg"
-      url = "blogs/aliquam"
+      url = "blogs/blog4"
 
     [[params.tiles.showcase]]
       title = "My first R project"
       subtitle = "Tracking Donald Trump approval rates in US election 2020"
       image = "pic02.jpg"
-      url = "blogs/tempus"
+      url = "blogs/blog1"
 
     [[params.tiles.showcase]]
       title = "My investment portfolios"
