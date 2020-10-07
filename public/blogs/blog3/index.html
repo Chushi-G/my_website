@@ -1,0 +1,226 @@
+<!DOCTYPE HTML>
+<html>
+
+    <head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<meta name="description" content="MFA2021 student at London Business School">
+	<meta name="author" content="Chushi Guo">
+	<meta name="generator" content="Hugo 0.75.1" />
+	<title>Tracking Donald Trump approval rates in US election 2020 &middot; Portfolio website for Chushi Guo</title>
+	<!-- Stylesheets -->
+	
+	<link rel="stylesheet" href="/css/main.css"/>
+	
+	
+
+	
+
+	<!-- Custom Fonts -->
+	<link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+	
+	<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+	<link rel="icon" type="image/x-icon" href="/favicon.ico">
+	
+
+	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+	<!--[if lt IE 9]>
+	<script src="js/ie/html5shiv.js"></script>
+	<script src="js/ie/html5shiv.jsrespond.min.js"></script>
+	<![endif]-->
+</head>
+
+    <body>
+
+    <!-- Wrapper -->
+        <div id="wrapper">
+
+            <!-- Header -->
+    <header id="header" class="alt">
+        <a href="/" class="logo"><strong>Home</strong> <span></span></a>
+        <nav>
+            <a href="#menu">Menu</a>
+        </nav>
+    </header>
+
+<!-- Menu -->
+    <nav id="menu">
+        <ul class="links">
+            
+                <li><a href="/">Home</a></li>
+            
+                <li><a href="/blogs">Blogs</a></li>
+            
+                <li><a href="/blogs/ipsum">Generic Blog</a></li>
+            
+                <li><a href="/elements.html">Elements</a></li>
+            
+
+        </ul>
+        <ul class="actions vertical">
+            
+                <li><a href="/blogs" class="button special fit">Get Started</a></li>
+            
+            
+                <li><a href="/" class="button fit">Log In</a></li>
+            
+        </ul>
+    </nav>
+
+        <!-- Main -->
+            <div id="main" class="alt">
+
+                
+                    <section id="one">
+                        <div class="inner">
+                            <header class="major">
+                                <h1>Tracking Donald Trump approval rates in US election 2020</h1>
+                            </header>
+                            
+                                <span class="image main"><img src="/img/blogs/pic01.jpg" alt="" /></span>
+                            
+                            <pre><code class="language-{r," data-lang="{r,">knitr::opts_chunk$set(
+  message = FALSE, 
+  warning = FALSE, 
+  tidy=FALSE,     # display code as typed
+  size=&quot;small&quot;)   # slightly smaller font for code
+options(digits = 3)
+
+# default figure size
+knitr::opts_chunk$set(
+  fig.width=6.75, 
+  fig.height=6.75,
+  fig.align = &quot;center&quot;
+)
+</code></pre><pre><code class="language-{r" data-lang="{r">library(tidyverse)  # Load ggplot2, dplyr, and all the other tidyverse packages
+library(mosaic)
+library(ggthemes)
+library(lubridate)
+library(here)
+library(skimr)
+library(janitor)
+library(httr)
+library(readxl)
+library(vroom)
+</code></pre><p>As we saw in class, fivethirtyeight.com has detailed data on <a href="https://projects.fivethirtyeight.com/trump-approval-ratings">all polls that track the president&rsquo;s approval </a></p>
+<pre><code class="language-{r," data-lang="{r,"># Import approval polls data
+approval_polllist &lt;- read_csv(here::here('data', 'approval_polllist.csv'))
+
+# or directly off fivethirtyeight website
+# approval_polllist &lt;- read_csv('https://projects.fivethirtyeight.com/trump-approval-data/approval_polllist.csv') 
+
+glimpse(approval_polllist)
+
+# Use `lubridate` to fix dates, as they are given as characters.
+library(lubridate)
+
+approval_polllist_cleaned &lt;- approval_polllist %&gt;%
+    filter(subgroup==&quot;Voters&quot;)%&gt;%
+    mutate(modeldate = mdy(modeldate), 
+           startdate = mdy(startdate), 
+           enddate=mdy(enddate),
+           createddate=mdy(createddate), 
+           timestamp=parse_date_time(timestamp, orders=&quot;HMSdmy&quot;)
+           )
+
+glimpse(approval_polllist_cleaned)
+</code></pre><h2 id="create-a-plot">Create a plot</h2>
+<p>What I would like you to do is to calculate the average net approval rate (approve- disapprove) for each week since he got into office. I want you plot the net approval, along with its 95% confidence interval. There are various dates given for each poll, please use <code>enddate</code>, i.e., the date the poll ended.</p>
+<pre><code class="language-{r," data-lang="{r,">
+
+trump_net_approval_CI&lt;- approval_polllist_cleaned %&gt;%
+  mutate (net_approval_rate = (approve - disapprove), 
+          end_week = isoweek(enddate), year =year(enddate)) %&gt;% 
+  group_by(year, end_week) %&gt;% 
+  summarize(mean_net = mean(net_approval_rate), 
+            std_trump = sd(net_approval_rate), 
+            count_endweek=n(),
+            st_error_trump = std_trump/sqrt(count_endweek), 
+            t_critical = qt(0.975,  count_endweek-1), 
+            lower_CI = mean_net - t_critical*st_error_trump, 
+            upper_CI = mean_net + t_critical*st_error_trump)
+
+ggplot(trump_net_approval_CI, aes(x=end_week, y=mean_net, color=as.factor(year))) +
+  facet_wrap(vars(year)) +
+  geom_linerange(aes(ymax = upper_CI , ymin =  lower_CI), size=0) +
+  geom_point(size=0.75) +
+  geom_hline(yintercept=0, linetype=&quot;solid&quot;, color = &quot;orange&quot;) + 
+  geom_line(aes(y = upper_CI))+
+  geom_line(aes(y = lower_CI))+
+  geom_ribbon(aes(ymin=lower_CI,ymax=upper_CI), alpha=0.2) +
+  geom_line() +
+  labs(title =&quot;Estimating Net Approval (approve-disapprove) for Donald Trump&quot;, 
+       subtitle =&quot;Weekly average of all polls&quot;, x=&quot;Week of year&quot;,
+       y = &quot;Average Net Approval (%) &quot;) +
+  scale_y_continuous(labels = scales::number_format(digits = 1)) + 
+  theme(panel.grid.major = element_line(colour = &quot;whitesmoke&quot;), 
+        panel.background = element_rect(fill = &quot;whitesmoke&quot;), 
+        legend.position = &quot;none&quot;) +
+    scale_y_continuous(breaks=c(-20,0, -17.7,-15.0,-12.5,-10.0,-7.5,-5.0,-2.5,0.0,2.5,5.0,7.5))+
+    scale_x_continuous(breaks= c(0,13, 26, 39, 52)) +
+    scale_color_manual(values=c(&quot;#FF736C&quot;, &quot;#7DAE00&quot;, &quot;#00BBBD&quot;, &quot;#C47EFF&quot;))
+
+
+</code></pre><p>You can facet by year, and add an orange line at zero. Your plot should look like this:</p>
+<pre><code class="language-{r" data-lang="{r">knitr::include_graphics(here::here(&quot;images&quot;, &quot;trump_approval_margin.png&quot;), error = FALSE)
+</code></pre><h2 id="compare-confidence-intervals">Compare Confidence Intervals</h2>
+<p>Compare the confidence intervals for <code>week 15</code> (6-12 April 2020) and <code>week 34</code> (17-23 August 2020). Can you explain what&rsquo;s going on? One paragraph would be enough.</p>
+<p>In week 15 of 2020, the mean net approval rate is -7.1 with 95% CI interval -8.21 and -5.99, while in week 34, the mean net approval rate is -10.91 with 95% CI interval -13.49 and -8.34. The mean net approval rate is lower and the confidence interval is wider in week 34, meaning that more people disapproved Trump in week 34 than week 15. One plausible explanation is that as the economy recovers from the covid-19 lockdown, more and more Americans disapprove Trump&rsquo;s covid measures and policies as they see second spike in covid-19 cases during the summer in the US.</p>
+
+                        </div>
+                    </section>
+            <!-- Disqus Inject -->
+                
+            </div>
+            
+        <!-- Footer -->
+            
+                <!-- Footer -->
+    <footer id="footer">
+        <div class="inner">
+            <ul class="icons">
+                
+                    <li><a href="https://www.linkedin.com/in/chushi-g-169703150/" class="icon alt fa-linkedin" target="_blank"><span class="label">LinkedIn</span></a></li>
+                
+                    <li><a href="https://github.com/Chushi-G" class="icon alt fa-github" target="_blank"><span class="label">GitHub</span></a></li>
+                
+                    <li><a href="https://medium.com/@chushi.guo" class="icon alt fa-medium" target="_blank"><span class="label">Twitter</span></a></li>
+                
+                    <li><a href="https://twitter.com/Chu89918456" class="icon alt fa-twitter" target="_blank"><span class="label">Twitter</span></a></li>
+                
+            </ul>
+            <ul class="copyright">
+                <li>&copy; Company Name</li>
+                
+                <li>Design:  <a href="https://www.html5up.net">HTML5 UP</a></li>
+                
+            </ul>
+        </div>
+    </footer>
+
+            
+        </div>
+
+    <!-- Scripts -->
+        <!-- Scripts -->
+    <!-- jQuery -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/jquery.scrolly.min.js"></script>
+    <script src="/js/jquery.scrollex.min.js"></script>
+    <script src="/js/skel.min.js"></script>
+    <script src="/js/util.js"></script>
+
+    
+
+    <!-- Main JS -->
+    <script src="/js/main.js"></script>
+
+    
+
+    
+
+    </body>
+</html>
