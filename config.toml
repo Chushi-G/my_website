@@ -99,20 +99,20 @@ disqusShortname = ""
 
     [[params.tiles.showcase]]
       title = "My first R project"
-      subtitle = "Tracking Donald Trump approval rates in US election 2020 "
+      subtitle = "Tracking Donald Trump approval rates since 2017 "
       image = "projects/trump.png"
-      url = "blogs/blog3"
+      url = "blogs/blog5"
 
     [[params.tiles.showcase]]
-      title = "My investment portfolios"
-      subtitle = "Long-only US equities performance in 2020"
-      image = "pic03.jpg"
-      url = "blogs/blog2"
+      title = "My personal investment portfolio performance"
+      subtitle = "Long-only US equities performance"
+      image = "markets.jpg"
+      url = "blogs/blog6"
 
     [[params.tiles.showcase]]
-      title = "Stock pitch project"
-      subtitle = "Time to buy/sell Disney stock?"
-      image = "pic04.jpg"
+      title = "Foodie collection"
+      subtitle = "I simply love food..."
+      image = "food.jpg"
       url = "blogs/blog1"
 
    # [[params.tiles.showcase]]

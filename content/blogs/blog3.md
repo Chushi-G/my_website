@@ -5,7 +5,7 @@ categories:
 date: "2017-10-31T22:26:13-05:00"
 description: The US 2020 election.
 draft: false
-image: pic01.jpg
+image: trump.png
 keywords: ""
 slug: blog3
 title: Tracking Donald Trump approval rates in US election 2020

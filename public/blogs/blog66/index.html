@@ -1,0 +1,273 @@
+<!DOCTYPE HTML>
+<html>
+
+    <head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<meta name="description" content="MFA2021 student at London Business School">
+	<meta name="author" content="Chushi Guo">
+	<meta name="generator" content="Hugo 0.75.1" />
+	<title>My personal investment portfolio performance in 2020 &middot; Portfolio website for Chushi Guo</title>
+	<!-- Stylesheets -->
+	
+	<link rel="stylesheet" href="/css/main.css"/>
+	
+	
+
+	
+
+	<!-- Custom Fonts -->
+	<link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+	
+	<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+	<link rel="icon" type="image/x-icon" href="/favicon.ico">
+	
+
+	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+	<!--[if lt IE 9]>
+	<script src="js/ie/html5shiv.js"></script>
+	<script src="js/ie/html5shiv.jsrespond.min.js"></script>
+	<![endif]-->
+</head>
+
+    <body>
+
+    <!-- Wrapper -->
+        <div id="wrapper">
+
+            <!-- Header -->
+    <header id="header" class="alt">
+        <a href="/" class="logo"><strong>Home</strong> <span></span></a>
+        <nav>
+            <a href="#menu">Menu</a>
+        </nav>
+    </header>
+
+<!-- Menu -->
+    <nav id="menu">
+        <ul class="links">
+            
+                <li><a href="/">Home</a></li>
+            
+                <li><a href="/blogs">Blogs</a></li>
+            
+                <li><a href="/blogs/ipsum">Generic Blog</a></li>
+            
+                <li><a href="/elements.html">Elements</a></li>
+            
+
+        </ul>
+        <ul class="actions vertical">
+            
+                <li><a href="/blogs" class="button special fit">Get Started</a></li>
+            
+            
+                <li><a href="/" class="button fit">Log In</a></li>
+            
+        </ul>
+    </nav>
+
+        <!-- Main -->
+            <div id="main" class="alt">
+
+                
+                    <section id="one">
+                        <div class="inner">
+                            <header class="major">
+                                <h1>My personal investment portfolio performance in 2020</h1>
+                            </header>
+                            
+                                <span class="image main"><img src="/img/blogs/pic01.jpg" alt="" /></span>
+                            
+                            
+
+
+<p>#Returns of financial stocks</p>
+<pre class="r"><code>nyse &lt;- read_csv(here::here(&#39;data&#39;,&quot;nyse.csv&quot;))</code></pre>
+<p>Table and a bar plot that shows the number of companies per sector, in descending order</p>
+<pre class="r"><code>chart_sector &lt;- nyse %&gt;% 
+  group_by (sector) %&gt;% 
+  summarise(number_of_companies = n()) %&gt;% 
+  arrange(desc(number_of_companies))
+
+ggplot (chart_sector, aes( x = fct_reorder(sector, -number_of_companies), y = number_of_companies))+
+  geom_col()+
+  labs(title = &quot;Companies Per Sector&quot;, x= &quot;Sector&quot;, y= &quot;Number Per Sector&quot; )+
+  theme(axis.text.x = element_text(angle = 90))</code></pre>
+<p><img src="/blogs/Blog6_files/figure-html/companies_per_sector-1.png" width="648" style="display: block; margin: auto;" /></p>
+<p>Gathers the tickers from Wikipedia</p>
+<pre class="r"><code>djia_url &lt;- &quot;https://en.wikipedia.org/wiki/Dow_Jones_Industrial_Average&quot;
+
+#get tables that exist on URL
+tables &lt;- djia_url %&gt;% 
+  read_html() %&gt;% 
+  html_nodes(css=&quot;table&quot;)
+
+
+# parse HTML tables into a dataframe called djia. 
+# Use purr::map() to create a list of all tables in URL
+djia &lt;- map(tables, . %&gt;% 
+               html_table(fill=TRUE)%&gt;% 
+               clean_names())
+
+
+# constituents
+table1 &lt;- djia[[2]] %&gt;% # the second table on the page contains the ticker symbols
+  mutate(date_added = ymd(date_added),
+         
+         # if a stock is listed on NYSE, its symbol is, e.g., NYSE: MMM
+         # We will get prices from yahoo finance which requires just the ticker
+         
+         # if symbol contains &quot;NYSE*&quot;, the * being a wildcard
+         # then we jsut drop the first 6 characters in that string
+         ticker = ifelse(str_detect(symbol, &quot;NYSE*&quot;),
+                          str_sub(symbol,7,11),
+                          symbol)
+         )
+
+# we need a vector of strings with just the 30 tickers + SPY
+tickers &lt;- table1 %&gt;% 
+  select(ticker) %&gt;% 
+  pull() %&gt;% # pull() gets them as a sting of characters
+  c(&quot;SPY&quot;) # and lets us add SPY, the SP500 ETF</code></pre>
+<p>Price data on stocks</p>
+<pre class="r"><code># Notice the cache=TRUE argument in the chunk options. Because getting data is time consuming, # cache=TRUE means that once it downloads data, the chunk will not run again next time you knit your Rmd
+
+myStocks &lt;- tickers %&gt;% 
+  tq_get(get  = &quot;stock.prices&quot;,
+         from = &quot;2020-03-25&quot;,
+         to   = &quot;2020-08-31&quot;) %&gt;%
+  group_by(symbol) 
+
+glimpse(myStocks) # examine the structure of the resulting data frame</code></pre>
+<pre><code>## Rows: 3,410
+## Columns: 8
+## Groups: symbol [31]
+## $ symbol   &lt;chr&gt; &quot;MMM&quot;, &quot;MMM&quot;, &quot;MMM&quot;, &quot;MMM&quot;, &quot;MMM&quot;, &quot;MMM&quot;, &quot;MMM&quot;, &quot;MMM&quot;, &quot;MMM…
+## $ date     &lt;date&gt; 2020-03-25, 2020-03-26, 2020-03-27, 2020-03-30, 2020-03-31,…
+## $ open     &lt;dbl&gt; 133, 132, 133, 132, 136, 132, 132, 136, 138, 148, 146, 148, …
+## $ high     &lt;dbl&gt; 135, 136, 137, 138, 139, 136, 138, 137, 141, 151, 150, 150, …
+## $ low      &lt;dbl&gt; 127, 131, 131, 131, 136, 131, 132, 133, 137, 144, 144, 147, …
+## $ close    &lt;dbl&gt; 132, 136, 133, 138, 137, 133, 138, 134, 141, 145, 149, 148, …
+## $ volume   &lt;dbl&gt; 7742500, 6717000, 4262300, 3869500, 3613700, 3777600, 399030…
+## $ adjusted &lt;dbl&gt; 129, 134, 131, 135, 134, 131, 135, 131, 138, 142, 146, 145, …</code></pre>
+<p>Calculation of different return periods</p>
+<pre class="r"><code>#calculate daily returns
+myStocks_returns_daily &lt;- myStocks %&gt;%
+  tq_transmute(select     = adjusted, 
+               mutate_fun = periodReturn, 
+               period     = &quot;daily&quot;, 
+               type       = &quot;log&quot;,
+               col_rename = &quot;daily_returns&quot;,
+               cols = c(nested.col))  
+
+#calculate monthly  returns
+myStocks_returns_monthly &lt;- myStocks %&gt;%
+  tq_transmute(select     = adjusted, 
+               mutate_fun = periodReturn, 
+               period     = &quot;monthly&quot;, 
+               type       = &quot;arithmetic&quot;,
+               col_rename = &quot;monthly_returns&quot;,
+               cols = c(nested.col)) </code></pre>
+<p>Summarized monthly returns since 2017-01-01 for each of the stocks and <code>SPY</code>; min, max, median, mean, SD.</p>
+<pre class="r"><code>summarise_monthly_returns &lt;- myStocks_returns_monthly %&gt;%
+  dplyr::group_by(symbol) %&gt;%
+  dplyr::filter(date &gt;= as.Date(&quot;2017-01-01&quot;)) %&gt;%
+  summarise(min_return = min(monthly_returns), max_return = max(monthly_returns), median_return = median(monthly_returns), mean_return = mean(monthly_returns), std_return = sd(monthly_returns))
+
+summarise_monthly_returns</code></pre>
+<pre><code>## # A tibble: 31 x 6
+##    symbol min_return max_return median_return mean_return std_return
+##    &lt;chr&gt;       &lt;dbl&gt;      &lt;dbl&gt;         &lt;dbl&gt;       &lt;dbl&gt;      &lt;dbl&gt;
+##  1 AAPL       0.0357     0.177         0.151       0.128      0.0552
+##  2 AMGN      -0.0333     0.180         0.0394      0.0503     0.0702
+##  3 AXP       -0.0506     0.0988        0.0216      0.0247     0.0562
+##  4 BA        -0.138      0.257        -0.0101      0.0251     0.143 
+##  5 CAT        0.0121     0.109         0.0557      0.0575     0.0343
+##  6 CRM       -0.0209     0.391         0.0755      0.114      0.144 
+##  7 CSCO      -0.104      0.128         0.0307      0.0249     0.0827
+##  8 CVX       -0.0593     0.270         0.0231      0.0460     0.116 
+##  9 DIS       -0.0494     0.159         0.0666      0.0536     0.0849
+## 10 DOW       -0.0375     0.255         0.0634      0.0817     0.104 
+## # … with 21 more rows</code></pre>
+<p>Density plot, using <code>geom_density()</code>, for each of the stocks</p>
+<pre class="r"><code>ggplot(myStocks_returns_monthly, aes( x = monthly_returns)) +
+  geom_density() +
+  facet_wrap(~symbol) +
+  labs(title = &quot;Density plot of the distribution of monthly returns&quot;,
+    y = &quot;Density&quot;, x = &quot;Monthly Returns&quot;) +
+    theme(plot.title = element_text(hjust = 0.5, size = 12, face = &quot;bold&quot;))</code></pre>
+<p><img src="/blogs/Blog6_files/figure-html/density_monthly_returns-1.png" width="648" style="display: block; margin: auto;" /></p>
+<p>We can infer from the plot that the “SPY” is the lest risky since the monthly return distribution is the most narrow, whereas the “DOW” has the widest distribution making it the most risky.</p>
+<p>Plot that shows the expected monthly return (mean) of a stock on the Y axis and the risk (standard deviation) in the X-axis.</p>
+<pre class="r"><code>myStocks_returns_monthly %&gt;% 
+  group_by(symbol) %&gt;% 
+  summarise(mean=mean(monthly_returns),sd=sd(monthly_returns)) %&gt;%
+  ggplot(aes(x=sd,y=mean,label=symbol)) +
+  geom_point() +
+  geom_smooth() +
+  ggrepel::geom_text_repel(show.legend = FALSE,size = 5) +
+  labs(title = &quot;Expected Monthly Returns vs Risk &quot;,
+    y = &quot;Expected monthly returns&quot;,
+    x = &quot;Risk&quot;) +
+    theme(plot.title = element_text(hjust = 0.5, size = 10, face = &quot;bold&quot;))</code></pre>
+<p><img src="/blogs/Blog6_files/figure-html/risk_return_plot-1.png" width="648" style="display: block; margin: auto;" /></p>
+<p>From this plot we can say that usually when the risk is low the expected monthly return is also low (e.g. SPY, JNJ) and vice versa (e.g. AAPL, CRM). However, DOW is risky but the expected monthly return is not very high. On the other hand, V, UNH and NKE have high expected return compared to their risk profile.</p>
+
+                        </div>
+                    </section>
+            <!-- Disqus Inject -->
+                
+            </div>
+            
+        <!-- Footer -->
+            
+                <!-- Footer -->
+    <footer id="footer">
+        <div class="inner">
+            <ul class="icons">
+                
+                    <li><a href="https://www.linkedin.com/in/chushi-g-169703150/" class="icon alt fa-linkedin" target="_blank"><span class="label">LinkedIn</span></a></li>
+                
+                    <li><a href="https://github.com/Chushi-G" class="icon alt fa-github" target="_blank"><span class="label">GitHub</span></a></li>
+                
+                    <li><a href="https://medium.com/@chushi.guo" class="icon alt fa-medium" target="_blank"><span class="label">Twitter</span></a></li>
+                
+                    <li><a href="https://twitter.com/Chu89918456" class="icon alt fa-twitter" target="_blank"><span class="label">Twitter</span></a></li>
+                
+            </ul>
+            <ul class="copyright">
+                <li>&copy; Company Name</li>
+                
+                <li>Design:  <a href="https://www.html5up.net">HTML5 UP</a></li>
+                
+            </ul>
+        </div>
+    </footer>
+
+            
+        </div>
+
+    <!-- Scripts -->
+        <!-- Scripts -->
+    <!-- jQuery -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/jquery.scrolly.min.js"></script>
+    <script src="/js/jquery.scrollex.min.js"></script>
+    <script src="/js/skel.min.js"></script>
+    <script src="/js/util.js"></script>
+
+    
+
+    <!-- Main JS -->
+    <script src="/js/main.js"></script>
+
+    
+
+    
+
+    </body>
+</html>

@@ -1,0 +1,194 @@
+---
+categories:
+- ""
+- ""
+date: "2020-10-07"
+description: Investment Performance
+draft: false
+image: markets.jpg
+keywords: ""
+slug: blog6
+title: My personal investment portfolio performance
+---
+
+
+```{r, setup, include=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE, 
+  warning = FALSE, 
+  tidy=FALSE,     # display code as typed
+  size="small")   # slightly smaller font for code
+options(digits = 3)
+
+# default figure size
+knitr::opts_chunk$set(
+  fig.width=6.75, 
+  fig.height=6.75,
+  fig.align = "center"
+)
+```
+
+```{r load-libraries, warning=FALSE, message=FALSE, echo=FALSE}
+library(tidyverse)  # Load ggplot2, dplyr, and all the other tidyverse packages
+library(mosaic)
+library(ggthemes)
+library(lubridate)
+library(fivethirtyeight)
+library(here)
+library(skimr)
+library(janitor)
+library(vroom)
+library(tidyquant)
+library(rvest)    # scrape websites
+library(purrr)  
+library(lubridate) #to handle dates
+library(ggrepel)
+```
+
+#Returns of financial stocks
+
+```{r load_nyse_data, message=FALSE, warning=FALSE}
+nyse <- read_csv(here::here('data',"nyse.csv"))
+```
+
+Table and a bar plot that shows the number of companies per sector, in descending order
+
+```{r companies_per_sector}
+
+chart_sector <- nyse %>% 
+  group_by (sector) %>% 
+  summarise(number_of_companies = n()) %>% 
+  arrange(desc(number_of_companies))
+
+ggplot (chart_sector, aes( x = fct_reorder(sector, -number_of_companies), y = number_of_companies))+
+  geom_col()+
+  labs(title = "Companies Per Sector", x= "Sector", y= "Number Per Sector" )+
+  theme(axis.text.x = element_text(angle = 90))
+
+```
+
+Gathers the tickers from Wikipedia
+
+```{r, tickers_from_wikipedia}
+
+djia_url <- "https://en.wikipedia.org/wiki/Dow_Jones_Industrial_Average"
+
+#get tables that exist on URL
+tables <- djia_url %>% 
+  read_html() %>% 
+  html_nodes(css="table")
+
+
+# parse HTML tables into a dataframe called djia. 
+# Use purr::map() to create a list of all tables in URL
+djia <- map(tables, . %>% 
+               html_table(fill=TRUE)%>% 
+               clean_names())
+
+
+# constituents
+table1 <- djia[[2]] %>% # the second table on the page contains the ticker symbols
+  mutate(date_added = ymd(date_added),
+         
+         # if a stock is listed on NYSE, its symbol is, e.g., NYSE: MMM
+         # We will get prices from yahoo finance which requires just the ticker
+         
+         # if symbol contains "NYSE*", the * being a wildcard
+         # then we jsut drop the first 6 characters in that string
+         ticker = ifelse(str_detect(symbol, "NYSE*"),
+                          str_sub(symbol,7,11),
+                          symbol)
+         )
+
+# we need a vector of strings with just the 30 tickers + SPY
+tickers <- table1 %>% 
+  select(ticker) %>% 
+  pull() %>% # pull() gets them as a sting of characters
+  c("SPY") # and lets us add SPY, the SP500 ETF
+
+```
+
+Price data on stocks
+
+```{r get_price_data, message=FALSE, warning=FALSE, cache=TRUE}
+# Notice the cache=TRUE argument in the chunk options. Because getting data is time consuming, # cache=TRUE means that once it downloads data, the chunk will not run again next time you knit your Rmd
+
+myStocks <- tickers %>% 
+  tq_get(get  = "stock.prices",
+         from = "2015-01-01",
+         to   = "2020-08-31") %>%
+  group_by(symbol) 
+
+glimpse(myStocks) # examine the structure of the resulting data frame
+```
+
+Calculation of different return periods
+
+```{r calculate_returns, message=FALSE, warning=FALSE, cache=TRUE}
+#calculate daily returns
+myStocks_returns_daily <- myStocks %>%
+  tq_transmute(select     = adjusted, 
+               mutate_fun = periodReturn, 
+               period     = "daily", 
+               type       = "log",
+               col_rename = "daily_returns",
+               cols = c(nested.col))  
+
+#calculate monthly  returns
+myStocks_returns_monthly <- myStocks %>%
+  tq_transmute(select     = adjusted, 
+               mutate_fun = periodReturn, 
+               period     = "monthly", 
+               type       = "arithmetic",
+               col_rename = "monthly_returns",
+               cols = c(nested.col)) 
+
+```
+
+Summarized monthly returns since 2017-01-01 for each of the stocks and `SPY`; min, max, median, mean, SD.
+
+```{r summarise_monthly_returns}
+
+summarise_monthly_returns <- myStocks_returns_monthly %>%
+  dplyr::group_by(symbol) %>%
+  dplyr::filter(date >= as.Date("2017-01-01")) %>%
+  summarise(min_return = min(monthly_returns), max_return = max(monthly_returns), median_return = median(monthly_returns), mean_return = mean(monthly_returns), std_return = sd(monthly_returns))
+
+summarise_monthly_returns
+
+```
+
+Density plot, using `geom_density()`, for each of the stocks
+
+```{r density_monthly_returns}
+
+ggplot(myStocks_returns_monthly, aes( x = monthly_returns)) +
+  geom_density() +
+  facet_wrap(~symbol) +
+  labs(title = "Density plot of the distribution of monthly returns",
+    y = "Density", x = "Monthly Returns") +
+    theme(plot.title = element_text(hjust = 0.5, size = 12, face = "bold"))
+
+```
+
+We can infer from the plot that the "SPY" is the lest risky since the monthly return distribution is the most narrow, whereas the "DOW" has the widest distribution making it the most risky. 
+
+Plot that shows the expected monthly return (mean) of a stock on the Y axis and the risk (standard deviation) in the X-axis.
+
+```{r risk_return_plot}
+
+myStocks_returns_monthly %>% 
+  group_by(symbol) %>% 
+  summarise(mean=mean(monthly_returns),sd=sd(monthly_returns)) %>%
+  ggplot(aes(x=sd,y=mean,label=symbol)) +
+  geom_point() +
+  geom_smooth() +
+  ggrepel::geom_text_repel(show.legend = FALSE,size = 5) +
+  labs(title = "Expected Monthly Returns vs Risk ",
+    y = "Expected monthly returns",
+    x = "Risk") +
+    theme(plot.title = element_text(hjust = 0.5, size = 10, face = "bold"))
+
+```
+
+From this plot we can say that usually when the risk is low the expected monthly return is also low (e.g. SPY, JNJ) and vice versa (e.g. AAPL, CRM). However, DOW is risky but the expected monthly return is not very high. On the other hand, V, UNH and NKE have high expected return compared to their risk profile. 

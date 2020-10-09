@@ -8,6 +8,28 @@
     <language>en-us</language>
     <lastBuildDate>Tue, 31 Oct 2017 22:27:21 -0500</lastBuildDate><atom:link href="/blogs/index.xml" rel="self" type="application/rss+xml" />
     <item>
+      <title>My personal investment portfolio performance</title>
+      <link>/blogs/blog6/</link>
+      <pubDate>Wed, 07 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blogs/blog6/</guid>
+      <description>#Returns of financial stocks
+nyse &amp;lt;- read_csv(here::here(&amp;#39;data&amp;#39;,&amp;quot;nyse.csv&amp;quot;)) Table and a bar plot that shows the number of companies per sector, in descending order
+chart_sector &amp;lt;- nyse %&amp;gt;% group_by (sector) %&amp;gt;% summarise(number_of_companies = n()) %&amp;gt;% arrange(desc(number_of_companies)) ggplot (chart_sector, aes( x = fct_reorder(sector, -number_of_companies), y = number_of_companies))+ geom_col()+ labs(title = &amp;quot;Companies Per Sector&amp;quot;, x= &amp;quot;Sector&amp;quot;, y= &amp;quot;Number Per Sector&amp;quot; )+ theme(axis.text.x = element_text(angle = 90)) Gathers the tickers from Wikipedia
+djia_url &amp;lt;- &amp;quot;https://en.</description>
+    </item>
+    
+    <item>
+      <title>Tracking Donald Trump approval rates since 2017</title>
+      <link>/blogs/blog5/</link>
+      <pubDate>Wed, 07 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blogs/blog5/</guid>
+      <description>Trump’s Approval Margins As we saw in class, fivethirtyeight.com has detailed data on all polls that track the president’s approval
+# Import approval polls data approval_polllist &amp;lt;- read_csv(here::here(&amp;#39;data&amp;#39;, &amp;#39;approval_polllist.csv&amp;#39;)) # or directly off fivethirtyeight website # approval_polllist &amp;lt;- read_csv(&amp;#39;https://projects.fivethirtyeight.com/trump-approval-data/approval_polllist.csv&amp;#39;) glimpse(approval_polllist) ## Rows: 15,619 ## Columns: 22 ## $ president &amp;lt;chr&amp;gt; &amp;quot;Donald Trump&amp;quot;, &amp;quot;Donald Trump&amp;quot;, &amp;quot;Donald Trump&amp;quot;, &amp;quot;… ## $ subgroup &amp;lt;chr&amp;gt; &amp;quot;All polls&amp;quot;, &amp;quot;All polls&amp;quot;, &amp;quot;All polls&amp;quot;, &amp;quot;All polls… ## $ modeldate &amp;lt;chr&amp;gt; &amp;quot;9/27/2020&amp;quot;, &amp;quot;9/27/2020&amp;quot;, &amp;quot;9/27/2020&amp;quot;, &amp;quot;9/27/2020… ## $ startdate &amp;lt;chr&amp;gt; &amp;quot;1/20/2017&amp;quot;, &amp;quot;1/20/2017&amp;quot;, &amp;quot;1/20/2017&amp;quot;, &amp;quot;1/21/2017… ## $ enddate &amp;lt;chr&amp;gt; &amp;quot;1/22/2017&amp;quot;, &amp;quot;1/22/2017&amp;quot;, &amp;quot;1/24/2017&amp;quot;, &amp;quot;1/23/2017… ## $ pollster &amp;lt;chr&amp;gt; &amp;quot;Gallup&amp;quot;, &amp;quot;Morning Consult&amp;quot;, &amp;quot;Ipsos&amp;quot;, &amp;quot;Gallup&amp;quot;, &amp;quot;… ## $ grade &amp;lt;chr&amp;gt; &amp;quot;B&amp;quot;, &amp;quot;B/C&amp;quot;, &amp;quot;B-&amp;quot;, &amp;quot;B&amp;quot;, &amp;quot;B-&amp;quot;, &amp;quot;C+&amp;quot;, &amp;quot;B+&amp;quot;, &amp;quot;B&amp;quot;, &amp;quot;C+… ## $ samplesize &amp;lt;dbl&amp;gt; 1500, 1992, 1632, 1500, 1651, 1500, 1190, 1500, 1… ## $ population &amp;lt;chr&amp;gt; &amp;quot;a&amp;quot;, &amp;quot;rv&amp;quot;, &amp;quot;a&amp;quot;, &amp;quot;a&amp;quot;, &amp;quot;a&amp;quot;, &amp;quot;lv&amp;quot;, &amp;quot;rv&amp;quot;, &amp;quot;a&amp;quot;, &amp;quot;lv&amp;quot;, … ## $ weight &amp;lt;dbl&amp;gt; 0.</description>
+    </item>
+    
+    <item>
       <title>About me</title>
       <link>/blogs/blog4/</link>
       <pubDate>Tue, 31 Oct 2017 22:42:51 -0500</pubDate>
@@ -35,12 +57,12 @@
     </item>
     
     <item>
-      <title>Ipsum</title>
+      <title>Foodie collection</title>
       <link>/blogs/blog1/</link>
       <pubDate>Tue, 31 Oct 2017 21:28:43 -0500</pubDate>
       
       <guid>/blogs/blog1/</guid>
-      <description>Nullam et orci eu lorem consequat tincidunt vivamus et sagittis magna sed nunc rhoncus condimentum sem. In efficitur ligula tate urna. Maecenas massa sed magna lacinia magna pellentesque lorem ipsum dolor. Nullam et orci eu lorem consequat tincidunt. Vivamus et sagittis tempus.</description>
+      <description>Exploring different cuisine is one of my most important hobbies. Food not only allows me to explore cultures in different countries but also bond with my friends and family. Please enjoy some of my foodie collection pictures and let me know if you want to go on food hunting with me.</description>
     </item>
     
   </channel>

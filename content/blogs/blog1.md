@@ -5,10 +5,10 @@ categories:
 date: "2017-10-31T21:28:43-05:00"
 description: ""
 draft: false
-image: pic10.jpg
+image: pot.jpeg
 keywords: ""
 slug: blog1
-title: Ipsum
+title: Foodie collection
 ---
 
-Nullam et orci eu lorem consequat tincidunt vivamus et sagittis magna sed nunc rhoncus condimentum sem. In efficitur ligula tate urna. Maecenas massa sed magna lacinia magna pellentesque lorem ipsum dolor. Nullam et orci eu lorem consequat tincidunt. Vivamus et sagittis tempus.
+Exploring different cuisine is one of my most important hobbies. Food not only allows me to explore cultures in different countries but also bond with my friends and family. Please enjoy some of my foodie collection pictures and let me know if you want to go on food hunting with me. 
