@@ -93,7 +93,7 @@ disqusShortname = ""
     
     [[params.tiles.showcase]]
       title = "About me"
-      subtitle = "Who I am and What I do"
+      subtitle = "Who I am"
       image = "projects/pic01.jpeg"
       url = "blogs/blog4"
 
@@ -110,8 +110,8 @@ disqusShortname = ""
       url = "blogs/blog6"
 
     [[params.tiles.showcase]]
-      title = "Foodie collection"
-      subtitle = "I simply love food..."
+      title = "My hobbies"
+      subtitle = "Something I like to do outside of academics"
       image = "food.jpg"
       url = "blogs/blog1"
 
